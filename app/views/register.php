@@ -5,7 +5,7 @@ require_once __DIR__ . '/../../config/config.php';
 // Cek jika pengguna sudah login
 if (isset($_SESSION['user_id'])) {
     // Jika pengguna sudah login, arahkan ke home (atau ke dashboard jika ingin)
-    header('Location: home.php');
+    header('Location: /jual_iphone/index.php');
     exit;
 }
 

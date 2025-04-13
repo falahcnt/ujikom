@@ -54,11 +54,11 @@ if (isset($_GET['id'])) {
                 <p>Harga Awal: Rp <?= number_format($hargaAwal, 0, ',', '.') ?></p>
                 <p>Diskon: <?= $diskon ?>%</p>
                 <p>Harga Setelah Diskon: Rp <?= number_format($hargaDiskon, 0, ',', '.') ?></p>
-                <a href="../../home.php" class="btn btn-primary mt-3">Kembali ke Home</a>
+                <a href="/jual_iphone/index.php" class="btn btn-primary mt-3">Kembali ke Home</a>
             </div>
         <?php else: ?>
             <h2>Produk tidak ditemukan atau stok habis.</h2>
-            <a href="home.php" class="btn btn-primary mt-3">Kembali ke Home</a>
+            <a href="/jual_iphone/index.php" class="btn btn-primary mt-3">Kembali ke Home</a>
         <?php endif; ?>
     </div>
 </body>

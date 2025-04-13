@@ -36,8 +36,9 @@ if ($cek->rowCount() > 0) {
 
    // Simpan transaksi
    try {
-       $stmt = $conn->prepare("INSERT INTO transaksi ( iphone_id, harga, tanggal) VALUES (?, ?, ?, NOW())");
-       $stmt->execute([$userId, $iphoneId, $harga]);
+      $stmt = $pdo->prepare("INSERT INTO transaksi (iphone_id, model, harga_total, tanggal) VALUES (?, ?, ?, ?)");
+$stmt->execute([$id_iphone, $model, $total, $tanggal]);
+
        
        echo "Pembelian berhasil!";
    } catch (PDOException $e) {

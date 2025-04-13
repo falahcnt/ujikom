@@ -27,7 +27,7 @@ $stmt->bind_param("ss", $username, $password);
 
 if ($stmt->execute()) {
     // Redirect ke halaman login setelah berhasil registrasi
-    header("Location: login.php");
+    header( "../views/login.php");
     exit();
 } else {
     echo "Error: " . $stmt->error;

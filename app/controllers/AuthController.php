@@ -20,7 +20,7 @@ class AuthController {
                 if ($user['role'] == 'admin') {
                     header("Location: /views/dashboard.php");
                 } else {
-                    header("Location: ../../home.php");
+                    header("Location: /jual_iphone/index.php");
                 }
             } else {
                 echo "Login gagal!";

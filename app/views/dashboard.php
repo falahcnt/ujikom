@@ -14,30 +14,31 @@ exit;
 
 }
 
+
 // Proses Tambah Handphone
-
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add'])) {
+    $model = $_POST['model'];
+    $harga = $_POST['harga'];
+    $diskon = !empty($_POST['diskon']) ? $_POST['diskon'] : 0; // Set diskon ke 0 jika tidak diisi
+    $stok = $_POST['stok'];
 
-$model = $_POST['model'];
+    // Cek apakah model sudah ada
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM iphones WHERE model = :model");
+    $stmt->execute(['model' => $model]);
+    $count = $stmt->fetchColumn();
 
-$harga = $_POST['harga'];
+    if ($count > 0) {
+        // Jika model sudah ada, tampilkan pesan kesalahan
+        $error_message = "Model '$model' sudah digunakan. Silahkan gunakan nama model yang berbeda.";
+    } else {
+        // Menyiapkan dan mengeksekusi query untuk menambah data
+        $stmt = $pdo->prepare("INSERT INTO iphones (model, harga, diskon, stok) VALUES (:model, :harga, :diskon, :stok)");
+        $stmt->execute(['model' => $model, 'harga' => $harga, 'diskon' => $diskon, 'stok' => $stok]);
 
-$diskon = !empty($_POST['diskon']) ? $_POST['diskon'] : 0; // Set diskon ke 0 jika tidak diisi
-
-$stok = $_POST['stok'];
-
-// Menyiapkan dan mengeksekusi query untuk menambah data
-
-$stmt = $pdo->prepare("INSERT INTO iphones (model, harga, diskon, stok) VALUES (:model, :harga, :diskon, :stok)");
-
-$stmt->execute(['model' => $model, 'harga' => $harga, 'diskon' => $diskon, 'stok' => $stok]);
-
-// Redirect kembali ke halaman yang sama setelah menambah
-
-header("Location: " . $_SERVER['PHP_SELF']);
-
-exit();
-
+        // Redirect kembali ke halaman yang sama setelah menambah
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit();
+    }
 }
 
 // Proses Edit Handphone
@@ -68,30 +69,19 @@ exit();
 
 }
 
+
+
 // Proses Hapus Handphone
-
 if (isset($_GET['delete'])) {
+    $id = $_GET['delete'];
 
-$id = $_GET['delete'];
+    // Hapus handphone tanpa menghapus transaksi yang terkait
+    $stmt = $pdo->prepare("DELETE FROM iphones WHERE id = :id");
+    $stmt->execute(['id' => $id]);
 
-// Hapus transaksi yang terkait terlebih dahulu
-
-$stmt_transaksi = $pdo->prepare("DELETE FROM transaksi WHERE iphone_id = :id");
-
-$stmt_transaksi->execute(['id' => $id]);
-
-// Setelah itu, hapus handphone
-
-$stmt = $pdo->prepare("DELETE FROM iphones WHERE id = :id");
-
-$stmt->execute(['id' => $id]);
-
-// Redirect kembali ke halaman yang sama
-
-header("Location: " . $_SERVER['PHP_SELF']);
-
-exit();
-
+    // Redirect kembali ke halaman yang sama
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
 }
 
 // Mengambil data handphone
@@ -102,10 +92,9 @@ $iphones = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Mengambil data transaksi
 
+// Mengambil data transaksi
 $stmt = $pdo->query("SELECT * FROM transaksi ORDER BY tanggal DESC");
-
 $transaksi = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
 ?>
 
 <!DOCTYPE html>
@@ -227,7 +216,7 @@ background-color: #333 !important;
 
 <li class="nav-item">
 
-<a href="add_admin.php" class="nav-link">Tambah Admin</a>
+<a href="../controllers/TambahAdmin.php" class="nav-link">Tambah Admin</a>
 
 </li>
 
@@ -248,6 +237,11 @@ background-color: #333 !important;
 <div class="container mt-5">
 
 <h2 class="mt-4">Daftar Mobil</h2>
+<?php if (isset($error_message)): ?>
+    <div class="alert alert-danger" role="alert">
+        <?= htmlspecialchars($error_message) ?>
+    </div>
+<?php endif; ?>
 
 <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addPhoneModal">Tambah Mobil</button>
 <!-- Modal untuk menambahkan mobil -->
@@ -352,6 +346,8 @@ background-color: #333 !important;
             <th>ID Transaksi</th>
             <th>Model</th>
             <th>Harga</th>
+            <th>Nama Pembeli</th>
+            <th>Metode Pembayaran</th>
             <th>Tanggal</th>
         </tr>
     </thead>
@@ -361,6 +357,8 @@ background-color: #333 !important;
                 <td><?= $trans['id'] ?></td>
                 <td><?= htmlspecialchars($trans['model']) ?></td>
                 <td>Rp <?= number_format($trans['harga_total'], 0, ',', '.') ?></td>
+                <td><?= htmlspecialchars($trans['nama_pembeli']) ?></td>
+                <td><?= htmlspecialchars($trans['metode_pembayaran']) ?></td>
                 <td><?= $trans['tanggal'] ?></td>
             </tr>
         <?php endforeach; ?>

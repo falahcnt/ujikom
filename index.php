@@ -67,7 +67,8 @@ $iphones = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <p>Rp <?= number_format($iphone['harga'], 0, ',', '.') ?></p>
                             <p>Diskon: <?= $iphone['diskon'] ?>%</p>
                             <p>Stok: <?= $iphone['stok'] ?></p> <!-- Menampilkan stok -->
-                            <a href="#" class="btn btn-primary" onclick="confirmPurchase(<?= $iphone['id'] ?>)">Beli</a>
+                            <a href="#" class="btn btn-success" onclick="confirmPurchase(<?= $iphone['id'] ?>)">Beli</a>
+
                         </div>
                     </div>
                 <?php else: ?>
@@ -87,7 +88,8 @@ $iphones = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <script>
 function confirmPurchase(id) {
     if (confirm("Anda yakin ingin membeli produk ini?")) {
-        window.location.href = "app/views/purchase.php?id=" + id;
+        window.location.href = "app/views/payment.php?id=" + id;
+
     }
 }
 </script>

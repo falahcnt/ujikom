@@ -4,7 +4,7 @@ require_once __DIR__ . '/../../config/config.php';
 
 // Cek apakah pengguna sudah login dan memiliki role admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header('Location: login.php');
+    header('Location: ../views/login.php');
     exit;
 }
 
@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <input type="password" class="form-control" id="password" name="password" required>
             </div>
             <button type="submit" class="btn btn-primary">Tambah Admin</button>
-            <a href="dashboard.php" class="btn btn-secondary">Kembali</a>
+            <a href="../views/dashboard.php" class="btn btn-secondary">Kembali</a>
         </form>
     </div>
 </body>

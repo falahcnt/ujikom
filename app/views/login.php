@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             header('Location: dashboard.php');
             exit;
         } elseif ($user['role'] == 'user') {
-            header('Location: /jual_iphone/home.php');
+            header('Location: /jual_iphone/index.php');
             exit;
         }
     } else {

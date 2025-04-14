@@ -267,7 +267,7 @@ background-color: #333 !important;
                         <input type="number" class="form-control" id="diskon" name="diskon" min="0" max="100">
                     </div>
                     <div class="mb-3">
-                        <label for="stok" class="form-label">Stok</label>
+                        <label for="stok" class="form-label">Jumlah</label>
                         <input type="number" class="form-control" id="stok" name="stok" required>
                     </div>
                     <button type="submit" name="add" class="btn btn-primary">Simpan</button>

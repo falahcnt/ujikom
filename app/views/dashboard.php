@@ -215,8 +215,7 @@ background-color: #333 !important;
 <ul class="navbar-nav ms-auto">
 
 <li class="nav-item">
-
-<a href="../controllers/TambahAdmin.php" class="nav-link">Tambah Admin</a>
+<a href="../controllers/TambahAdmin.php" class="btn btn-success me-3">Tambah Admin</a>
 
 </li>
 
@@ -244,6 +243,7 @@ background-color: #333 !important;
 <?php endif; ?>
 
 <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addPhoneModal">Tambah Mobil</button>
+
 <!-- Modal untuk menambahkan mobil -->
 <div class="modal fade" id="addPhoneModal" tabindex="-1" aria-labelledby="addPhoneModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -267,7 +267,7 @@ background-color: #333 !important;
                         <input type="number" class="form-control" id="diskon" name="diskon" min="0" max="100">
                     </div>
                     <div class="mb-3">
-                        <label for="stok" class="form-label">Jumlah</label>
+                        <label for="stok" class="form-label">Stok</label>
                         <input type="number" class="form-control" id="stok" name="stok" required>
                     </div>
                     <button type="submit" name="add" class="btn btn-primary">Simpan</button>
@@ -280,90 +280,78 @@ background-color: #333 !important;
 <table class="table table-bordered table-striped mt-4">
     <thead>
         <tr>
+            <th>No</th>
             <th>ID</th>
             <th>Model</th>
             <th>Harga</th>
             <th>Diskon (%)</th>
+            <th>Harga Setelah Diskon</th> <!-- Kolom baru -->
             <th>Stok</th>
             <th>Aksi</th>
         </tr>
     </thead>
     <tbody>
-        <?php foreach ($iphones as $iphone): ?>
-            <tr>
-                <td><?= $iphone['id'] ?></td>
-                <td><?= htmlspecialchars($iphone['model']) ?></td>
-                <td>Rp <?= number_format($iphone['harga'], 0, ',', '.') ?></td>
-                <td><?= $iphone['diskon'] ?></td>
-                <td><?= $iphone['stok'] ?></td>
-                <td>
-                    <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editPhoneModal<?= $iphone['id'] ?>">Edit</button>
-                    <a href="?delete=<?= $iphone['id'] ?>" class="btn btn-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus?');">Hapus</a>
-                </td>
-            </tr>
-            <!-- Modal Edit -->
-            <div class="modal fade" id="editPhoneModal<?= $iphone['id'] ?>" tabindex="-1" aria-labelledby="editPhoneModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="editPhoneModalLabel">Edit Handphone</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <form method="post">
-                                <input type="hidden" name="id" value="<?= $iphone['id'] ?>">
-                                <div class="mb-3">
-                                    <label for="model" class="form-label">Model</label>
-                                    <input type="text" class="form-control" id="model" name="model" value="<?= htmlspecialchars($iphone['model']) ?>" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="harga" class="form-label">Harga</label>
-                                    <input type="number" class="form-control" id="harga" name="harga" value="<?= $iphone['harga'] ?>" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="diskon" class="form-label">Diskon (%) (Opsional)</label>
-                                    <input type="number" class="form-control" id="diskon" name="diskon" value="<?= $iphone['diskon'] ?>" min="0" max="100">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="stok" class="form-label">Stok</label>
-                                    <input type="number" class="form-control" id="stok" name="stok" value="<?= $iphone['stok'] ?>" required>
-                                </div>
-                                <button type="submit" name="edit" class="btn btn-primary">Simpan</button>
-                            </form>
-                        </div>
+    <?php foreach ($iphones as $index => $iphone): ?>
+        <tr>
+            <td><?= $index + 1 ?></td> <!-- Menambahkan nomor urut -->
+            <td><?= $iphone['id'] ?></td>
+            <td><?= htmlspecialchars($iphone['model']) ?></td>
+            <td>Rp <?= number_format($iphone['harga'], 0, ',', '.') ?></td>
+            <td><?= $iphone['diskon'] ?>%</td>
+            <td>
+                <?php
+                // Hitung Harga Setelah Diskon
+                $hargaSetelahDiskon = $iphone['harga'] - ($iphone['harga'] * ($iphone['diskon'] / 100));
+                ?>
+                Rp <?= number_format($hargaSetelahDiskon, 0, ',', '.') ?>
+            </td>
+            <td><?= $iphone['stok'] ?></td>
+            <td>
+                <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editPhoneModal<?= $iphone['id'] ?>">Edit</button>
+                <a href="?delete=<?= $iphone['id'] ?>" class="btn btn-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus?');">Hapus</a>
+            </td>
+        </tr>
+        <!-- Modal Edit -->
+        <div class="modal fade" id="editPhoneModal<?= $iphone['id'] ?>" tabindex="-1" aria-labelledby="editPhoneModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editPhoneModalLabel">Edit Handphone</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="post">
+                            <input type="hidden" name="id" value="<?= $iphone['id'] ?>">
+                            <div class="mb-3">
+                                <label for="model" class="form-label">Model</label>
+                                <input type="text" class="form-control" id="model" name="model" value="<?= htmlspecialchars($iphone['model']) ?>" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="harga" class="form-label">Harga</label>
+                                <input type="number" class="form-control" id="harga" name="harga" value="<?= $iphone['harga'] ?>" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="diskon" class="form-label">Diskon (%) (Opsional)</label>
+                                <input type="number" class="form-control" id="diskon" name="diskon" value="<?= $iphone['diskon'] ?>" min="0" max="100">
+                            </div>
+                            <div class="mb-3">
+                                <label for="stok" class="form-label">Stok</label>
+                                <input type="number" class="form-control" id="stok" name="stok" value="<?= $iphone['stok'] ?>" required>
+                            </div>
+                            <button type="submit" name="edit" class="btn btn-primary">Simpan</button>
+                        </form>
                     </div>
                 </div>
             </div>
-        <?php endforeach; ?>
+        </div>
+    <?php endforeach; ?>
     </tbody>
 </table>
+<div class="container mt-4">
+    
+    <a href="transaksi.php" class="btn btn-primary">Lihat Daftar Transaksi</a>
 
-<!-- Tabel Daftar Transaksi -->
-<h3 class="mt-5">Daftar Transaksi</h3>
-<table class="table table-bordered table-striped">
-    <thead>
-        <tr>
-            <th>ID Transaksi</th>
-            <th>Model</th>
-            <th>Harga</th>
-            <th>Nama Pembeli</th>
-            <th>Metode Pembayaran</th>
-            <th>Tanggal</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php foreach ($transaksi as $trans): ?>
-            <tr>
-                <td><?= $trans['id'] ?></td>
-                <td><?= htmlspecialchars($trans['model']) ?></td>
-                <td>Rp <?= number_format($trans['harga_total'], 0, ',', '.') ?></td>
-                <td><?= htmlspecialchars($trans['nama_pembeli']) ?></td>
-                <td><?= htmlspecialchars($trans['metode_pembayaran']) ?></td>
-                <td><?= $trans['tanggal'] ?></td>
-            </tr>
-        <?php endforeach; ?>
-    </tbody>
-</table>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

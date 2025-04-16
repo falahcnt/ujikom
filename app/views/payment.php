@@ -1,103 +1,89 @@
 <?php
 session_start();
-require_once __DIR__ . '/../../config/config.php';
+require_once '../../config/config.php';
 
-// Cek login
+// Cek apakah pengguna sudah login
 if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php');
+    header('Location: /jual_iphone/app/views/login.php');
     exit;
 }
 
-// Cek ID iPhone
+// Cek apakah ID produk diterima dari permintaan
 if (!isset($_GET['id'])) {
-    die('ID iPhone tidak ditemukan!');
+    header('Location: /jual_iphone/app/views/index.php'); // Kembali jika tidak ada ID
+    exit;
 }
 
-$iphone_id = $_GET['id'];
+$id = $_GET['id'];
 
-// Ambil data iPhone
+// Ambil detail produk dari database
 $stmt = $pdo->prepare("SELECT * FROM iphones WHERE id = ?");
-$stmt->execute([$iphone_id]);
-$iphone = $stmt->fetch();
+$stmt->execute([$id]);
+$product = $stmt->fetch(PDO::FETCH_ASSOC);
 
-if (!$iphone) {
-    die('iPhone tidak ditemukan!');
+if (!$product) {
+    header('Location: /jual_iphone/app/views/index.php'); // Jika produk tidak ditemukan
+    exit;
 }
 
-// Hitung harga diskon
-$harga_diskon = $iphone['harga'] - ($iphone['harga'] * $iphone['diskon'] / 100);
+// Proses pembelian (misalnya dengan memeriksa stok, menghitung harga diskon, dll.)
+$harga_asli = $product['harga'];
+$diskon = $product['diskon'];
+$harga_diskon = $harga_asli * (1 - ($diskon / 100));
 
-// Proses pembayaran
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nama_pembeli = $_POST['nama_pembeli'];
-    $metode = $_POST['metode'];
-
-    // Insert ke transaksi
-    $stmt = $pdo->prepare("INSERT INTO transaksi (user_id, iphone_id, model, harga_total, tanggal, nama_pembeli, metode_pembayaran) 
-                           VALUES (?, ?, ?, ?, NOW(), ?, ?)");
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Simpan detail pembayaran ke database
+    $stmt = $pdo->prepare("INSERT INTO purchases (user_id, model, harga_asli, diskon, harga_diskon, nama_pembeli, metode) VALUES (?, ?, ?, ?, ?, ?, ?)");
     $stmt->execute([
-        $_SESSION['user_id'],
-        $iphone_id,
-        $iphone['model'],
-        $harga_diskon,
-        $nama_pembeli,
-        $metode
+        $_SESSION['user_id'], // user_id
+        $product['model'], // model produk
+        $harga_asli, // harga asli
+        $diskon, // diskon
+        $harga_diskon, // harga setelah diskon
+        $_POST['nama_pembeli'], // nama pembeli
+        $_POST['metode'] // metode pembayaran
     ]);
 
-    // Update stok
-    $pdo->prepare("UPDATE iphones SET stok = stok - 1 WHERE id = ?")->execute([$iphone_id]);
-
-    // Tampilkan pop-up berhasil
+    // Tampilkan pesan berhasil dan arahkan ke riwayat pembelian
     echo "<script>
-            alert('Pembayaran berhasil!');
-            window.location.href = '/jual_iphone/index.php';
-          </script>";
-    exit();
+        alert('Pembayaran berhasil!');
+        window.location.href = 'riwayat.php';
+    </script>";
+    exit;
 }
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Pembayaran</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pembayaran Mobil</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script>
-        function validateForm() {
-            var namaPembeli = document.getElementById("nama_pembeli").value;
-
-            // Cek jika nama pembeli tidak hanya huruf
-            var regex = /^[A-Za-z\s]+$/;
-            if (!regex.test(namaPembeli)) {
-                alert("Nama pembeli hanya boleh huruf dan tidak mengandung angka!");
-                return false; // Mencegah pengiriman formulir
-            }
-            return true; // Mengizinkan pengiriman formulir
-        }
-    </script>
 </head>
-<body class="bg-dark text-white">
+<body>
+    
 <div class="container mt-5">
     <h2>Pembayaran Mobil</h2>
-    <p><strong>Model:</strong> <?= htmlspecialchars($iphone['model']) ?></p>
-    <p><strong>Harga:</strong> Rp <?= number_format($harga_diskon, 0, ',', '.') ?></p>
+    <form method="post">
+        <p>Model: <?= htmlspecialchars($product['model']) ?></p>
+        <p>Harga Sebelum Diskon: Rp <?= number_format($harga_asli, 0, ',', '.') ?></p>
+        <p>Diskon: <?= htmlspecialchars($diskon) ?>%</p>
+        <p>Harga Setelah Diskon: Rp <?= number_format($harga_diskon, 0, ',', '.') ?></p>
 
-    <form method="POST" onsubmit="return validateForm();">
         <div class="mb-3">
             <label for="nama_pembeli" class="form-label">Nama Pembeli:</label>
-            <input type="text" class="form-control" id="nama_pembeli" name="nama_pembeli" required>
+            <input type="text" class="form-control" name="nama_pembeli" required>
         </div>
 
         <div class="mb-3">
-            <label class="form-label">Metode Pembayaran:</label><br>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="metode" id="bank" value="Bank Transfer (BCA)" required>
-                <label class="form-check-label" for="bank">BCA</label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="metode" id="qris" value="QRIS" required>
-                <label class="form-check-label" for="qris">QRIS</label>
-            </div>
+            <label for="metode" class="form-label">Metode Pembayaran:</label>
+            <select name="metode" class="form-select" required>
+                <option value="BCA">BCA</option>
+                <option value="QRIS">QRIS</option>
+            </select>
         </div>
+
         <button type="submit" class="btn btn-success">Bayar Sekarang</button>
     </form>
 </div>

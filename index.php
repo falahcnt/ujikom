@@ -8,6 +8,26 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+// Cek apakah ada transaksi yang tersimpan untuk ditampilkan
+if (isset($_SESSION['transaction'])) {
+    $transaction = $_SESSION['transaction'];
+    // Menampilkan rincian pembelian
+    echo "<div class='alert alert-success mt-3'>";
+    echo "<strong>Rincian Pembelian:</strong><br>";
+    echo "Model: " . htmlspecialchars($transaction['model']) . "<br>";
+    echo "Harga Sebelum Diskon: Rp " . number_format($transaction['harga_asli'], 0, ',', '.') . "<br>";
+    echo "Diskon: " . htmlspecialchars($transaction['diskon']) . "%<br>";
+    echo "Harga Setelah Diskon: Rp " . number_format($transaction['harga_diskon'], 0, ',', '.') . "<br>";
+    echo "Nama Pembeli: " . htmlspecialchars($transaction['nama_pembeli']) . "<br>";
+    echo "Metode Pembayaran: " . htmlspecialchars($transaction['metode']) . "<br>";
+    // Tambahkan tombol untuk melihat struk
+    echo "<a href='struk.php' class='btn btn-primary mt-3'>Lihat Rincian Pembelian (Struk)</a>";
+    echo "</div>";
+
+    // Hapus transaksi dari sesi setelah ditampilkan
+    unset($_SESSION['transaction']);
+}
+
 // Mengambil data handphone termasuk stok
 $stmt = $pdo->query("SELECT * FROM iphones");
 $iphones = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -43,6 +63,9 @@ $iphones = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                <a  href="app/views/riwayat.php" class="btn btn-success me-3">Riwayat Pembelian</a>
+                </li>
                 <li class="nav-item">
                     <a href="app/views/logout.php" class="btn btn-danger">Logout</a>
                 </li>
